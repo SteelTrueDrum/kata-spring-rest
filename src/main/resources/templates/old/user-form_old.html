@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Форма пользователя</title>
+    <style>
+        table {
+            border-collapse: collapse;
+        }
+
+        td {
+            padding: 8px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 250px;
+            padding: 5px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 5px 15px;
+            border: none;
+            cursor: pointer;
+            border-radius: 3px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-save {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-cancel {
+            background: #dc3545;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<h2 th:text="${user.id} != null ? 'Редактирование пользователя' : 'Создание нового пользователя'">Форма пользователя</h2>
+
+<!-- Форма для создания -->
+<form th:if="${user.id == null}"
+      th:action="@{/admin/new}"
+      th:object="${user}"
+      method="post">
+    <table>
+        <tr>
+            <td><label for="firstName">Имя:</label></td>
+            <td><input type="text" id="firstName" th:field="*{firstName}" required /></td>
+        </tr>
+        <tr>
+            <td><label for="lastName">Фамилия:</label></td>
+            <td><input type="text" id="lastName" th:field="*{lastName}" required /></td>
+        </tr>
+        <tr>
+            <td><label for="email">Email:</label></td>
+            <td><input type="email" id="email" th:field="*{email}" required /></td>
+        </tr>
+        <tr>
+            <td><label for="username">Имя пользователя:</label></td>
+            <td><input type="text" id="username" th:field="*{username}" required /></td>
+        </tr>
+        <tr>
+            <td><label for="password">Пароль:</label></td>
+            <td><input type="password" id="password" th:field="*{password}" required /></td>
+        </tr>
+        <tr>
+            <td>Роли:</td>
+            <td>
+                <div class="checkbox-group">
+                    <div th:each="role : ${roles}">
+                        <label>
+                            <input type="checkbox"
+                                   name="roleIds"
+                                   th:value="${role.id}" />
+                            <span th:text="${role.name}">ROLE_USER</span>
+                        </label>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <button type="submit" class="btn btn-save">Создать</button>
+                <a href="/admin" class="btn btn-cancel">Отмена</a>
+            </td>
+        </tr>
+    </table>
+</form>
+
+<!-- Форма для редактирования -->
+<form th:if="${user.id != null}"
+      th:action="@{/admin/{id}(id=${user.id})}"
+      th:object="${user}"
+      method="post">
+    <input type="hidden" name="_method" value="put" />
+    <table>
+        <tr>
+            <td><label for="editFirstName">Имя:</label></td>
+            <td><input type="text" id="editFirstName" th:field="*{firstName}" required /></td>
+        </tr>
+        <tr>
+            <td><label for="editLastName">Фамилия:</label></td>
+            <td><input type="text" id="editLastName" th:field="*{lastName}" required /></td>
+        </tr>
+        <tr>
+            <td><label for="editEmail">Email:</label></td>
+            <td><input type="email" id="editEmail" th:field="*{email}" required /></td>
+        </tr>
+        <tr>
+            <td><label for="editUsername">Имя пользователя:</label></td>
+            <td><input type="text" id="editUsername" th:field="*{username}" required /></td>
+        </tr>
+        <tr>
+            <td><label for="editPassword">Пароль:</label></td>
+            <td>
+                <input type="password" id="editPassword" th:field="*{password}" />
+                <br/><small>Оставьте пустым, чтобы оставить текущий пароль</small>
+            </td>
+        </tr>
+        <tr>
+            <td>Роли:</td>
+            <td>
+                <th:block th:each="role : ${roles}">
+                    <label>
+<!--                        <input type="checkbox" name="roleIds" th:value="${role.id}" th:field="*{roles}"/>-->
+                        <input type="checkbox"
+                               name="roleIds"
+                               th:value="${role.id}"
+                               th:checked="${user.roles.contains(role)}" />
+                    </label>
+                    <label th:text="${role.name}"></label>
+                </th:block>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <button type="submit" class="btn btn-save">Обновить</button>
+                <a href="/admin" class="btn btn-cancel">Отмена</a>
+            </td>
+        </tr>
+    </table>
+</form>
+</body>
+</html>
