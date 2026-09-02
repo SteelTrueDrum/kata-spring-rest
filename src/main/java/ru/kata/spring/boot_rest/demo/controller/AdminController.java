@@ -2,8 +2,15 @@ package ru.kata.spring.boot_rest.demo.controller;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
 import ru.kata.spring.boot_rest.demo.model.User;
 import ru.kata.spring.boot_rest.demo.service.RoleService;
 import ru.kata.spring.boot_rest.demo.service.UserService;
@@ -23,39 +30,37 @@ public class AdminController {
 
     // GET /admin - список всех пользователей
     @GetMapping
-    public String listUsers(@AuthenticationPrincipal User user, Model model) {
-        model.addAttribute("users", userService.getAllUsers());
-        model.addAttribute("roles", roleService.getAllRoles());
-        model.addAttribute("user", user);
-        model.addAttribute("newUser", new User());
-        model.addAttribute("editUser", new User());
-        model.addAttribute("deleteUser", new User());
-        return "admin";
+    public ModelAndView listUsers(@AuthenticationPrincipal User user) {
+        ModelAndView mav = new ModelAndView("admin");
+        mav.addObject("users", userService.getAllUsers());
+        mav.addObject("roles", roleService.getAllRoles());
+        mav.addObject("user", user);
+        mav.addObject("newUser", new User());
+        return mav;
     }
 
     // POST /admin - сохранение пользователя
     @PostMapping("/new")
-    public String saveUser(@ModelAttribute("newUser") User user,
-                           @RequestParam(value = "roleIds", required = false) Set<Long> roleIds) {
-
+    public ModelAndView saveUser(@ModelAttribute("newUser") User user,
+                                 @RequestParam(value = "roleIds", required = false) Set<Long> roleIds) {
         userService.saveUser(user, roleIds);
-        return "redirect:/admin";
+        return new ModelAndView("redirect:/admin");
     }
 
     // PUT /admin/{id} - обновление пользователя
     @PutMapping("/{id}")
-    public String updateUser(@PathVariable Long id,
-                             @ModelAttribute User user,
-                             @RequestParam(value = "roleIds", required = false) Set<Long> roleIds) {
+    public ModelAndView updateUser(@PathVariable Long id,
+                                   @ModelAttribute User user,
+                                   @RequestParam(value = "roleIds", required = false) Set<Long> roleIds) {
         user.setId(id);
         userService.updateUser(user, roleIds);
-        return "redirect:/admin";
+        return new ModelAndView("redirect:/admin");
     }
 
     // DELETE /admin/{id} - удаление пользователя
     @DeleteMapping("/{id}")
-    public String deleteUser(@PathVariable Long id) {
+    public ModelAndView deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
-        return "redirect:/admin";
+        return new ModelAndView("redirect:/admin");
     }
 }

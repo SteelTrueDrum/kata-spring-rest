@@ -1,5 +1,6 @@
 package ru.kata.spring.boot_rest.demo.service;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,11 +53,9 @@ public class UserServiceImpl implements UserService {
     public void updateUser(User user, Set<Long> roleIds) {
         User existingUser = getUserById(user.getId());
 
-        existingUser.setFirstName(user.getFirstName());
-        existingUser.setLastName(user.getLastName());
-        existingUser.setAge(user.getAge());
-        existingUser.setEmail(user.getEmail());
-        existingUser.setUsername(user.getUsername());
+        // Копируем все свойства, игнорируя null
+        BeanUtils.copyProperties(user, existingUser,
+                "id", "password", "roles", "authorities");
 
         // Обновляем пароль, если он был изменен
         if (user.getPassword() != null && !user.getPassword().isEmpty()) {
