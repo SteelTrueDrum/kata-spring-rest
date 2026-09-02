@@ -32,9 +32,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                    .antMatchers("/admin/**").hasRole( "ADMIN")
-                    .antMatchers("/user/**").hasAnyRole("USER", "ADMIN")
+                    .antMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                    .antMatchers("/api/v1/user/**").hasAnyRole("USER", "ADMIN")
                     .antMatchers("/", "/login").permitAll()
+                    .antMatchers("/css/**", "/js/**", "/img/**").permitAll()
+                    .antMatchers("/", "/login").permitAll()
+                    .antMatchers("/admin/**").hasRole("ADMIN")
+                    .antMatchers("/user/**").hasAnyRole("USER", "ADMIN")
                     .anyRequest().authenticated()
                 .and()
                     .formLogin()
@@ -64,16 +68,4 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         return new HiddenHttpMethodFilter();
     }
 
-    // аутентификация inMemory
-//    @Bean
-//    public UserDetailsService userDetailsService() {
-//        UserDetails user =
-//                User.withDefaultPasswordEncoder()
-//                        .username("user")
-//                        .password("user")
-//                        .roles("USER")
-//                        .build();
-//
-//        return new InMemoryUserDetailsManager(user);
-//    }
 }
