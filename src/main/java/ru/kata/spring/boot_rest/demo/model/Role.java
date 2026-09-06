@@ -1,5 +1,6 @@
 package ru.kata.spring.boot_rest.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.Column;
@@ -14,6 +15,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "roles")
+@JsonIgnoreProperties("users")
 public class Role implements GrantedAuthority {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
