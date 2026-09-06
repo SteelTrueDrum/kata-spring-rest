@@ -35,20 +35,16 @@
 <header class="header container-fluid">
     <div style="display: flex; justify-content: left">
         <h2 style="color: white; margin: 10px 1px 10px 20px; font-size: 20px">
-            <span th:text="${user.email}">xxx@xxx.ru</span>
+            <span id="navbar-email">xxx@xxx.ru</span>
         </h2>
-        <h2 style="color: white;margin: 10px 1px 10px 2px;font-size: 20px; font-weight: normal">with roles:</h2>
         <h2 style="color: white; margin: 10px 10px 10px 2px; font-size: 20px; font-weight: normal">
-            <span th:each="authority : ${#authentication.getAuthorities()}"
-                  th:text="${#strings.replace(authority.getAuthority(), 'ROLE_', '')} + ' '">ROLE</span>
+            <span id="navbar-roles">ROLE</span>
         </h2>
     </div>
     <div class="nav-links">
-        <form th:action="@{/logout}" method="post" class="inline-form">
+        <form method="post" class="inline-form">
             <!-- Внутри вашего header или nav -->
-            <button type="submit" class="bg-transparent border-0 p-2" style="color: #c0c0c0;">
-                Logout
-            </button>
+            <a href="/logout" class="text-secondary text-decoration-none mr-3">Logout</a>
         </form>
     </div>
 </header>
@@ -83,15 +79,15 @@
                                 <th scope="col">Role</th>
                             </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="user-table-body">
                             <tr>
-                                <td th:text="${user.getId()}">1</td>
-                                <td th:text="${user.firstName}">Имя</td>
-                                <td th:text="${user.lastName}">Фамилия</td>
-                                <td th:text="${user.age}">30</td>
-                                <td th:text="${user.email}">Email</td>
+                                <td>1</td>
+                                <td>Имя</td>
+                                <td>Фамилия</td>
+                                <td>30</td>
+                                <td>Email</td>
                                 <td>
-                                    <span th:each="role : ${user.roles}" class="" th:text="${role.name.replace('ROLE_', '')} + ' '">ROLE</span>
+                                    <span>ROLE</span>
                                 </td>
                             </tr>
                             </tbody>
@@ -107,5 +103,6 @@
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script src="/js/user.js"></script>
 </body>
 </html>
