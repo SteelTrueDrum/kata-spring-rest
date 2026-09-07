@@ -1,7 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5"
-      lang="ru">
+<html lang="ru">
 
 <head>
     <meta charset="UTF-8">
@@ -124,7 +122,7 @@
                                                 </td>
 
                                             </tr>
-                                            <tr th:if="${users == null or users.isEmpty()}">
+                                            <tr>
                                                 <td colspan="8" style="text-align: center;">Пользователи не найдены</td>
                                             </tr>
                                             </tbody>
@@ -254,40 +252,40 @@
                 <input type="hidden" name="_method" value="PUT" />
                 <div class="modal-body">
                     <div class="mb-3 text-center">
-                        <label class="col-form-label font-weight-bold d-block">ID</label>
+                        <label for="edit-id" class="col-form-label font-weight-bold d-block">ID</label>
                         <input type="text" class="form-control d-inline-block" id="edit-id"
                                 style="width: 50%;" readonly disabled>
                         <!-- Скрытое поле для передачи ID -->
                         <input type="hidden" name="id" >
                     </div>
                     <div class="mb-3 text-center">
-                        <label class="col-form-label font-weight-bold d-block">First name</label>
+                        <label for="edit-firstname" class="col-form-label font-weight-bold d-block">First name</label>
                         <!-- ИЗМЕНЕНИЕ: name="firstName" для привязки к модели -->
                         <input type="text" class="form-control d-inline-block" name="firstName" id="edit-firstname"
                                required style="width: 50%;">
                     </div>
                     <div class="mb-3 text-center">
-                        <label class="col-form-label font-weight-bold d-block">Last name</label>
+                        <label for="edit-lastname" class="col-form-label font-weight-bold d-block">Last name</label>
                         <input type="text" class="form-control d-inline-block" name="lastName" id="edit-lastname"
                                required style="width: 50%;">
                     </div>
                     <div class="mb-3 text-center">
-                        <label class="col-form-label font-weight-bold d-block">Age</label>
+                        <label for="edit-age" class="col-form-label font-weight-bold d-block">Age</label>
                         <input type="number" class="form-control d-inline-block" name="age" id="edit-age"
                                required style="width: 50%;">
                     </div>
                     <div class="mb-3 text-center">
-                        <label class="col-form-label font-weight-bold d-block">Email</label>
+                        <label for="edit-email" class="col-form-label font-weight-bold d-block">Email</label>
                         <input type="email" class="form-control d-inline-block" name="email" id="edit-email"
                                required style="width: 50%;">
                     </div>
                     <div class="mb-3 text-center">
-                        <label class="col-form-label font-weight-bold d-block">Password</label>
+                        <label for="edit-password" class="col-form-label font-weight-bold d-block">Password</label>
                         <input type="password" class="form-control d-inline-block" name="password" id="edit-password"
                                placeholder="Leave blank to keep current" style="width: 50%;">
                     </div>
                     <div class="mb-3 text-center">
-                        <label class="col-form-label font-weight-bold d-block">Role</label>
+                        <label for="edit-roles" class="col-form-label font-weight-bold d-block">Role</label>
                         <select class="form-control d-inline-block" name="roleIds"
                                 id="edit-roles" multiple size="2" style="width: 50%;">
                             <option value="1">ADMIN</option>
@@ -319,32 +317,32 @@
                 <input type="hidden" name="_method" value="DELETE" />
                 <div class="modal-body">
                     <div class="mb-3 text-center">
-                        <label class="form-label font-weight-bold d-block">ID</label>
+                        <label for="delete-id" class="form-label font-weight-bold d-block">ID</label>
                         <input type="text" class="form-control d-inline-block" id="delete-id"
                                style="width: 50%;" readonly disabled>
                     </div>
                     <div class="mb-3 text-center">
-                        <label class="form-label font-weight-bold d-block">First name</label>
+                        <label for="delete-firstname" class="form-label font-weight-bold d-block">First name</label>
                         <input type="text" class="form-control d-inline-block" id="delete-firstname"
                                style="width: 50%;" readonly disabled>
                     </div>
                     <div class="mb-3 text-center">
-                        <label class="form-label font-weight-bold d-block">Last name</label>
+                        <label for="delete-lastname" class="form-label font-weight-bold d-block">Last name</label>
                         <input type="text" class="form-control d-inline-block" id="delete-lastname"
                                style="width: 50%;" readonly disabled>
                     </div>
                     <div class="mb-3 text-center">
-                        <label class="form-label font-weight-bold d-block">Age</label>
+                        <label for="delete-age" class="form-label font-weight-bold d-block">Age</label>
                         <input type="number" class="form-control d-inline-block" id="delete-age"
                                style="width: 50%;" readonly disabled>
                     </div>
                     <div class="mb-3 text-center">
-                        <label class="form-label font-weight-bold d-block">Email</label>
+                        <label for="delete-email" class="form-label font-weight-bold d-block">Email</label>
                         <input type="email" class="form-control d-inline-block" id="delete-email"
                                style="width: 50%;" readonly disabled>
                     </div>
                     <div class="mb-3 text-center">
-                        <label class="col-form-label font-weight-bold d-block">Role</label>
+                        <label for="delete-roles" class="col-form-label font-weight-bold d-block">Role</label>
                         <!-- ИЗМЕНЕНИЕ: Показываем роли пользователя -->
                         <select class="form-control d-inline-block" multiple size="2" style="width: 50%;"
                                 id="delete-roles" disabled>

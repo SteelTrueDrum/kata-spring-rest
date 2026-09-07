@@ -1,6 +1,5 @@
 package ru.kata.spring.boot_rest.demo.service;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,26 +48,6 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
-//    @Override
-//    public void updateUser(User user, Set<Long> roleIds) {
-//        User existingUser = getUserById(user.getId());
-//
-//        // Копируем все свойства, игнорируя null
-//        BeanUtils.copyProperties(user, existingUser,
-//                "id", "password", "roles", "authorities");
-//
-//        // Обновляем пароль, если он был изменен
-//        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
-//            existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
-//        }
-//
-//        // Обновляем роли
-//        Set<Role> roles = roleService.getRolesByIds(roleIds);
-//        existingUser.setRoles(roles);
-//
-//        userDao.updateUser(existingUser);
-//    }
-
     @Override
     public void deleteUser(Long id) {
         User user = userDao.getUserById(id);
@@ -83,27 +62,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateUser(Long id, User user, Set<Long> roleIds) {
-        // 1. Извлекаем текущего пользователя из БД
-        User existingUser = getUserById(id);
+    public void updateUser(Long id, User incomingUser, Set<Long> roleIds) {
+        // 1. Привязываем ID, который пришел из пути (Path) контроллера
+        incomingUser.setId(id);
 
-        // 2. Явно обновляем текстовые/числовые поля без рефлексии (BeanUtils)
-        existingUser.setFirstName(user.getFirstName());
-        existingUser.setLastName(user.getLastName());
-        existingUser.setAge(user.getAge());
-        existingUser.setEmail(user.getEmail());
-        existingUser.setUsername(user.getUsername());
-
-        // 3. Обновляем пароль только в том случае, если с фронтенда пришел новый пароль
-        if (user.getPassword() != null && !user.getPassword().trim().isEmpty()) {
-            existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
+        // 2. Обрабатываем пароль
+        if (incomingUser.getPassword() != null && !incomingUser.getPassword().trim().isEmpty()) {
+            // Если пришел новый пароль — шифруем его
+            incomingUser.setPassword(passwordEncoder.encode(incomingUser.getPassword()));
+        } else {
+            // Если пароль пустой, берем старый пароль из базы, чтобы не затереть его null'ом
+            User databaseUser = getUserById(id);
+            incomingUser.setPassword(databaseUser.getPassword());
         }
 
-        // 4. Загружаем и сетим новые роли
+        // 3. Загружаем из базы и сетим роли
         Set<Role> roles = roleService.getRolesByIds(roleIds);
-        existingUser.setRoles(roles);
+        incomingUser.setRoles(roles);
 
-        // 5. Передаем подготовленный объект в DAO
-        userDao.updateUser(existingUser);
+        // 4. Передаем готовую модель напрямую в DAO
+        userDao.updateUser(incomingUser);
     }
 }
