@@ -49,25 +49,25 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
-    @Override
-    public void updateUser(User user, Set<Long> roleIds) {
-        User existingUser = getUserById(user.getId());
-
-        // Копируем все свойства, игнорируя null
-        BeanUtils.copyProperties(user, existingUser,
-                "id", "password", "roles", "authorities");
-
-        // Обновляем пароль, если он был изменен
-        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
-            existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
-        }
-
-        // Обновляем роли
-        Set<Role> roles = roleService.getRolesByIds(roleIds);
-        existingUser.setRoles(roles);
-
-        userDao.updateUser(existingUser);
-    }
+//    @Override
+//    public void updateUser(User user, Set<Long> roleIds) {
+//        User existingUser = getUserById(user.getId());
+//
+//        // Копируем все свойства, игнорируя null
+//        BeanUtils.copyProperties(user, existingUser,
+//                "id", "password", "roles", "authorities");
+//
+//        // Обновляем пароль, если он был изменен
+//        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+//            existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
+//        }
+//
+//        // Обновляем роли
+//        Set<Role> roles = roleService.getRolesByIds(roleIds);
+//        existingUser.setRoles(roles);
+//
+//        userDao.updateUser(existingUser);
+//    }
 
     @Override
     public void deleteUser(Long id) {
@@ -80,5 +80,30 @@ public class UserServiceImpl implements UserService {
     @Override
     public User findByEmail(String email) {
         return userDao.findByEmail(email).orElse(null);
+    }
+
+    @Override
+    public void updateUser(Long id, User user, Set<Long> roleIds) {
+        // 1. Извлекаем текущего пользователя из БД
+        User existingUser = getUserById(id);
+
+        // 2. Явно обновляем текстовые/числовые поля без рефлексии (BeanUtils)
+        existingUser.setFirstName(user.getFirstName());
+        existingUser.setLastName(user.getLastName());
+        existingUser.setAge(user.getAge());
+        existingUser.setEmail(user.getEmail());
+        existingUser.setUsername(user.getUsername());
+
+        // 3. Обновляем пароль только в том случае, если с фронтенда пришел новый пароль
+        if (user.getPassword() != null && !user.getPassword().trim().isEmpty()) {
+            existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
+        }
+
+        // 4. Загружаем и сетим новые роли
+        Set<Role> roles = roleService.getRolesByIds(roleIds);
+        existingUser.setRoles(roles);
+
+        // 5. Передаем подготовленный объект в DAO
+        userDao.updateUser(existingUser);
     }
 }

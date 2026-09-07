@@ -42,7 +42,7 @@ public class AdminRestController {
 
     // POST /api/v1/admin/users - создать нового пользователя
     @PostMapping("/users")
-    public ResponseEntity<?> createUser(
+    public ResponseEntity<Map<String, Object>> createUser(
             @RequestBody User user,
             @RequestParam(required = false) Set<Long> roleIds) {
 
@@ -58,12 +58,11 @@ public class AdminRestController {
 
     // PUT /api/v1/admin/users/{id} - обновить пользователя
     @PutMapping("/users/{id}")
-    public ResponseEntity<?> updateUser(
+    public ResponseEntity<Map<String, Object>> updateUser(
             @PathVariable Long id,
             @RequestBody User user,
             @RequestParam(required = false) Set<Long> roleIds) {
-        user.setId(id);
-        userService.updateUser(user, roleIds);
+        userService.updateUser(id, user, roleIds);
 
         Map<String, Object> response = new HashMap<>();
         response.put("message", "User updated successfully");

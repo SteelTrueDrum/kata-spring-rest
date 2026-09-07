@@ -9,7 +9,7 @@ public interface UserService {
     List<User> getAllUsers();
     User getUserById(Long id);
     void saveUser(User user, Set<Long> roleIds);
-    void updateUser(User user, Set<Long> roleIds);
+//    void updateUser(User user, Set<Long> roleIds);
     void deleteUser(Long id);
 
     // Методы по умолчанию для одного параметра User
@@ -17,9 +17,11 @@ public interface UserService {
         saveUser(user, null);
     }
 
-    default void updateUser(User user) {
-        updateUser(user, null);
-    }
+//    default void updateUser(User user) {
+//        updateUser(user, null);
+//    }
 
     User findByEmail(String name);
+
+    void updateUser(Long id, User user, Set<Long> roleIds);
 }
