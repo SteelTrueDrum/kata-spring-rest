@@ -11,6 +11,34 @@ document.addEventListener('DOMContentLoaded', () => {
     setupDeleteForm();
 });
 
+// Helper-функция для форматирования ролей из объекта (убирает ROLE_)
+function formatRoles(rolesArray) {
+    return rolesArray.map(r => r.name.replace('ROLE_', '')).join(' ');
+}
+
+// Helper-функция для генерации HTML-строки пользователя
+function createUserRowHtml(user) {
+    const roles = formatRoles(user.roles);
+    return `
+        <tr id="user-row-${user.id}">
+            <td>${user.id}</td>
+            <td>${user.firstName}</td>
+            <td>${user.lastName}</td>
+            <td>${user.age}</td>
+            <td>${user.email}</td>
+            <td>${roles}</td>
+            <td>
+                <button class="btn btn-info btn-sm text-white" 
+                        onclick="openEditModal(${user.id})">Edit</button>
+            </td>
+            <td>
+                <button class="btn btn-danger btn-sm" 
+                        onclick="openDeleteModal(${user.id})">Delete</button>
+            </td>
+        </tr>
+    `;
+}
+
 // ========================================================
 // 1. ЗАПОЛНЕНИЕ ШАПКИ (NAVBAR) И ВКЛАДКИ USER INFORMATION
 // ========================================================
@@ -18,14 +46,11 @@ function initNavbar() {
     fetch(USER_API_URL)
         .then(res => res.json())
         .then(user => {
-            // Находим и заполняем email и роли текущего админа в шапке
             document.getElementById('navbar-email').innerText = user.email;
 
-            // Превращаем ["ROLE_ADMIN", "ROLE_USER"] в строку "ADMIN USER"
-            const roles = user.roles.map(r => r.name.replace('ROLE_', '')).join(' ');
+            const roles = formatRoles(user.roles);
             document.getElementById('navbar-roles').innerText = `with roles: ${roles}`;
 
-            // --- ДОБАВЛЕНО: Заполнение таблицы во вкладке User ---
             const currentUserTableBody = document.getElementById('current-user-table-body');
             if (currentUserTableBody) {
                 currentUserTableBody.innerHTML = `
@@ -51,7 +76,7 @@ function loadUsersTable() {
         .then(res => res.json())
         .then(users => {
             const tableBody = document.getElementById('all-users-table-body');
-            tableBody.innerHTML = ''; // Очищаем старые данные
+            tableBody.innerHTML = '';
 
             if (users.length === 0) {
                 tableBody.innerHTML = '<tr><td colspan="8" class="text-center">Пользователи не найдены</td></tr>';
@@ -59,27 +84,7 @@ function loadUsersTable() {
             }
 
             users.forEach(user => {
-                const roles = user.roles.map(r => r.name.replace('ROLE_', '')).join(' ');
-
-                const row = `
-                    <tr>
-                        <td>${user.id}</td>
-                        <td>${user.firstName}</td>
-                        <td>${user.lastName}</td>
-                        <td>${user.age}</td>
-                        <td>${user.email}</td>
-                        <td>${roles}</td>
-                        <td>
-                            <button class="btn btn-info btn-sm text-white" 
-                                    onclick="openEditModal(${user.id})">Edit</button>
-                        </td>
-                        <td>
-                            <button class="btn btn-danger btn-sm" 
-                                    onclick="openDeleteModal(${user.id})">Delete</button>
-                        </td>
-                    </tr>
-                `;
-                tableBody.insertAdjacentHTML('beforeend', row);
+                tableBody.insertAdjacentHTML('beforeend', createUserRowHtml(user));
             });
         })
         .catch(err => console.error('Ошибка загрузки таблицы:', err));
@@ -97,8 +102,6 @@ function setupCreateForm() {
 
         const selectRoles = document.getElementById('add-user-roles');
         const roleIds = Array.from(selectRoles.selectedOptions).map(opt => parseInt(opt.value));
-
-        // Вытаскиваем значения напрямую, принудительно убирая возможные пробелы
         const passwordValue = document.getElementById('add-user-password').value.trim();
 
         const userJson = {
@@ -107,31 +110,41 @@ function setupCreateForm() {
             age: parseInt(document.getElementById('add-user-age').value),
             email: document.getElementById('add-user-email').value,
             username: document.getElementById('add-user-email').value,
-            password: passwordValue // Наше проверенное значение
+            password: passwordValue
         };
-
-        // ВЫВОДИМ В КОНСОЛЬ ДЛЯ ПРОВЕРКИ (Нажмите F12 в браузере перед отправкой!)
-        console.log("Отправляем на бэкенд объект:", userJson);
 
         const params = new URLSearchParams();
         roleIds.forEach(id => params.append('roleIds', id));
 
         fetch(`${ADMIN_API_URL}?${params.toString()}`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(userJson)
         })
             .then(res => {
-                if (res.ok) {
-                    form.reset();
-                    loadUsersTable();
-                    const triggerEl = document.getElementById('users-table-tab');
-                    if (triggerEl) triggerEl.click();
-                } else {
-                    alert('Не удалось создать пользователя. Проверьте консоль бэкенда.');
-                }
+                if (!res.ok) throw new Error('Ошибка при создании пользователя');
+                return res.json(); // Принимаем чистый объект User с бэкенда (статус 201)
             })
-            .catch(err => console.error('Ошибка при создании:', err));
+            .then(createdUser => {
+                form.reset();
+
+                // ООП Подход: Вместо перезагрузки всей таблицы loadUsersTable(),
+                // мы просто точечно вставляем новую строку в конец таблицы!
+                const tableBody = document.getElementById('all-users-table-body');
+                // Если таблица была пуста, убираем заглушку
+                if (tableBody.innerHTML.includes('Пользователи не найдены')) {
+                    tableBody.innerHTML = '';
+                }
+                tableBody.insertAdjacentHTML('beforeend', createUserRowHtml(createdUser));
+
+                // Переключаем вкладку на таблицу пользователей
+                const triggerEl = document.getElementById('users-table-tab');
+                if (triggerEl) triggerEl.click();
+            })
+            .catch(err => {
+                console.error('Ошибка при создании:', err);
+                alert('Не удалось создать пользователя.');
+            });
     });
 }
 
@@ -139,7 +152,6 @@ function setupCreateForm() {
 // 4. МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ (EDIT)
 // ==========================================
 function openEditModal(id) {
-    // Получаем актуальные данные пользователя с бэкенда и заполняем форму модалки
     fetch(`${ADMIN_API_URL}/${id}`)
         .then(res => res.json())
         .then(user => {
@@ -148,16 +160,14 @@ function openEditModal(id) {
             document.getElementById('edit-lastname').value = user.lastName;
             document.getElementById('edit-age').value = user.age;
             document.getElementById('edit-email').value = user.email;
-            document.getElementById('edit-password').value = ''; // Пароль оставляем пустым для безопасности
+            document.getElementById('edit-password').value = '';
 
-            // Выделяем текущие роли пользователя в селекте модалки
             const selectRoles = document.getElementById('edit-roles');
             const userRoleIds = user.roles.map(r => r.id);
             Array.from(selectRoles.options).forEach(opt => {
                 opt.selected = userRoleIds.includes(parseInt(opt.value));
             });
 
-            // Показываем модальное окно с помощью встроенного API Bootstrap 5
             const editModal = new bootstrap.Modal(document.getElementById('editModal'));
             editModal.show();
         })
@@ -189,23 +199,30 @@ function setupEditForm() {
 
         fetch(`${ADMIN_API_URL}/${id}?${params.toString()}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(userJson)
         })
             .then(res => {
-                if (res.ok) {
-                    const closeButton = document.querySelector('#editModal [data-bs-dismiss="modal"]')
-                        || document.querySelector('#editModal [data-dismiss="modal"]');
-                    if (closeButton) {
-                        closeButton.click();
-                    }
+                if (!res.ok) throw new Error('Ошибка обновления данных');
+                return res.json(); // Получаем обновленный чистый объект User (статус 200)
+            })
+            .then(updatedUser => {
+                // Закрываем модалку через Close-кнопку
+                const closeButton = document.querySelector('#editModal [data-bs-dismiss="modal"]')
+                    || document.querySelector('#editModal [data-dismiss="modal"]');
+                if (closeButton) closeButton.click();
 
-                    loadUsersTable(); // Перерисовываем таблицу с новыми данными
-                } else {
-                    alert('Ошибка обновления данных');
+                // ООП Подход: Вместо полной перезагрузки таблицы, мы находим
+                // конкретную строку по ID (благодаря добавленному id="user-row-...") и заменяем её
+                const oldRow = document.getElementById(`user-row-${updatedUser.id}`);
+                if (oldRow) {
+                    oldRow.outerHTML = createUserRowHtml(updatedUser);
                 }
             })
-            .catch(err => console.error('Ошибка отправки PUT запроса:', err));
+            .catch(err => {
+                console.error('Ошибка отправки PUT запроса:', err);
+                alert('Ошибка обновления данных');
+            });
     });
 }
 
@@ -216,7 +233,6 @@ function openDeleteModal(id) {
     fetch(`${ADMIN_API_URL}/${id}`)
         .then(res => res.json())
         .then(user => {
-            // Заполняем поля модалки (в HTML они должны быть disabled)
             document.getElementById('delete-id').value = user.id;
             document.getElementById('delete-firstname').value = user.firstName;
             document.getElementById('delete-lastname').value = user.lastName;
@@ -229,11 +245,10 @@ function openDeleteModal(id) {
                 opt.selected = userRoleIds.includes(parseInt(opt.value));
             });
 
-            // Показываем модальное окно удаления
             const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
             deleteModal.show();
         })
-        .catch(err => console.error('Ошибка открытия модального окна удаления:', err));
+        .catch(err => console.error('Ошибка открытия модалки удаления:', err));
 }
 
 function setupDeleteForm() {
@@ -248,21 +263,25 @@ function setupDeleteForm() {
             method: 'DELETE'
         })
             .then(res => {
-                if (res.ok) {
+                if (res.ok) { // Ожидаем статус 204 No Content без тела
                     const closeButton = document.querySelector('#deleteModal [data-bs-dismiss="modal"]')
                         || document.querySelector('#deleteModal [data-dismiss="modal"]')
-                        || document.querySelector('#deleteModal .btn-secondary'); // Запасной вариант по классу кнопки Close
+                        || document.querySelector('#deleteModal .btn-secondary');
 
-                    if (closeButton) {
-                        closeButton.click(); // Симулируем клик для закрытия
+                    if (closeButton) closeButton.click();
+
+                    // Находим строку в DOM по уникальному ID и удаляем ее из дерева
+                    const rowToDelete = document.getElementById(`user-row-${id}`);
+                    if (rowToDelete) {
+                        rowToDelete.remove();
                     }
-
-                    loadUsersTable(); // Обновляем таблицу (удаленный юзер исчезнет)
                 } else {
-                    alert('Не удалось удалить пользователя');
+                    throw new Error('Не удалось удалить пользователя');
                 }
             })
-            .catch(err => console.error('Ошибка отправки DELETE запроса:', err));
+            .catch(err => {
+                console.error('Ошибка отправки DELETE запроса:', err);
+                alert('Не удалось удалить пользователя');
+            });
     });
 }
-
