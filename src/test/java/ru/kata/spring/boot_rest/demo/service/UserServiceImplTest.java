@@ -154,7 +154,7 @@ class UserServiceImplTest {
     void updateUser_ShouldUpdateWithNewPassword() {
         // Given
         User updatedUser = new User();
-        updatedUser.setPassword("newPass123");
+        updatedUser.setPassword("newPassword123");
         updatedUser.setEmail("updated@mail.ru");
         updatedUser.setFirstName("updated");
         updatedUser.setLastName("Name");
