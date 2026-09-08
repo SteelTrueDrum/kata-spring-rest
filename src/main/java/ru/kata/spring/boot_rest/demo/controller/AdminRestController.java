@@ -42,31 +42,24 @@ public class AdminRestController {
 
     // POST /api/v1/admin/users - создать нового пользователя
     @PostMapping("/users")
-    public ResponseEntity<Map<String, Object>> createUser(
+    public ResponseEntity<User> createUser(
             @RequestBody User user,
             @RequestParam(required = false) Set<Long> roleIds) {
 
-            userService.saveUser(user, roleIds);
+        userService.saveUser(user, roleIds);
 
-            Map<String, Object> response = new HashMap<>();
-            response.put("message", "User created successfully");
-            response.put("user", user);
-
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-
+        return ResponseEntity.status(HttpStatus.CREATED).body(user);
     }
 
     // PUT /api/v1/admin/users/{id} - обновить пользователя
     @PutMapping("/users/{id}")
-    public ResponseEntity<Map<String, Object>> updateUser(
+    public ResponseEntity<User> updateUser(
             @PathVariable Long id,
             @RequestBody User user,
             @RequestParam(required = false) Set<Long> roleIds) {
         userService.updateUser(id, user, roleIds);
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "User updated successfully");
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(user);
     }
 
     // DELETE /api/v1/admin/users/{id} - удалить пользователя
