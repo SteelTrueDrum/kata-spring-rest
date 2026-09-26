@@ -14,9 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.kata.spring.boot_rest.demo.model.User;
 import ru.kata.spring.boot_rest.demo.service.UserService;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 @RestController
